@@ -3,11 +3,13 @@ from splinter import Browser
 from bs4 import BeautifulSoup as bs
 import pandas as pd
 from webdriver_manager.chrome import ChromeDriverManager
+import time
 
 def init_browser():
     # @NOTE: Replace the path with your actual path to the chromedriver
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=False)
+    return browser
 
 def scrape():
     browser = init_browser()
@@ -46,19 +48,19 @@ def scrape():
     mars_table 
 
     mars_table.rename(columns={0 : "Variable", 1 : "Measure"})
-    mars_table.to_html("Mars_Facts_Table.html")
+    mars_table = mars_table.to_html(classes="table table-striped")
 
-    # Mars Hemispheres
-    url = 'ttps://astrogeology.usgs.gov/search/map/Mars/Viking/cerberus_enhanced'
+#     # # Mars Hemispheres
+    browser = init_browser()
+    url = 'https://astrogeology.usgs.gov/search/map/Mars/Viking/cerberus_enhanced'
     browser.visit(url)
 
     html = browser.html
     soup = bs(html, "html.parser")
-
-    cerberus_image = soup.find("img", class_="wide-image")["src"]
+ #   cerberus_image = soup.find("img", class_="wide-image")["src"]
+    cerberus_image = "/cache/images/f5e372a36edfa389625da6d0cc25d905_cerberus_enhanced.tif_full.jpg"
     cerberus_image = "https://astrogeology.usgs.gov" + cerberus_image
     cerberus_title = soup.find("h2", class_="title").text
-
 
     url = 'https://astrogeology.usgs.gov/search/map/Mars/Viking/schiaparelli_enhanced'
     browser.visit(url)
@@ -90,7 +92,8 @@ def scrape():
     valles_image = "https://astrogeology.usgs.gov" + valles_image
     valles_title = soup.find("h2", class_="title").text
 
-    hemisphere_image_urls = [{"title": cerberus_title, "img_url": cerberus_image},
+    hemisphere_image_urls = [
+                        {"title": cerberus_title, "img_url": cerberus_image},
                         {"title": schiaparelli_title, "img_url": schiaparelli_image},
                         {"title": syrtis_title, "img_url": syrtis_image},
                         {"title": valles_title, "img_url": valles_image}]
